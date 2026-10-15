@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Find buying-intent leads on Reddit every morning\n\nFor founders, marketers and sales teams who want to hear about people asking for a tool like theirs. Every morning this workflow searches Reddit for buying-intent phrases, saves each new post to Google Sheets and pings Slack. It runs on the [Reddit Scraper](https://apify.com/harshmaur/reddit-scraper) Actor on Apify, so it keeps working after Reddit closes its public API and RSS.\n\n### How it works\n1. **Every morning** runs at 07:00.\n2. **Search Reddit for buying intent** searches each phrase for posts from the last day (comments are skipped).\n3. **Optional AI filter**: when `useAiFilter` is true, the Actor labels each post with `wants_software` and **Keep real leads** drops posts labelled false (job ads, hiring, news, self-promotion).\n4. **Skip leads already saved** drops posts from earlier runs.\n5. Each lead is appended to Google Sheets and posted to Slack.\n\n### Setup\n1. Add the **Apify** node (`@apify/n8n-nodes-apify`, a verified community node) if your n8n does not have it yet.\n2. Create an **Apify API** credential (no Apify account yet? [Sign up free](https://console.apify.com/sign-up)) with the token from [Apify Console → Settings → API & Integrations](https://console.apify.com/settings/integrations). The free Apify plan includes monthly credit.\n3. Create a Google Sheet with a tab named `Leads` and columns `date, subreddit, title, author, url, upvotes, comments, matched, aiLabel, snippet`. Connect Google Sheets and pick it.\n4. Connect Slack and pick a channel.\n5. Edit `phrases` and `community` in **Settings**.\n\n### Customization tips\n- The AI filter needs a paid Apify plan and adds about $0.60 per 1,000 posts. On the free plan leave `useAiFilter` false; the run ignores AI options anyway.\n- Rewrite the `wants_software` question in **Search Reddit for buying intent** to fit your product.\n- Results cost $2 per 1,000 on Apify (less on paid Apify plans). The Apify node caps each run at $2.",
+        "content": "## Find buying-intent leads on Reddit every morning\n\nFor founders and sales teams who want to hear about people asking for a tool like theirs. Every morning this workflow searches Reddit for buying-intent phrases, saves each new post to Google Sheets and pings Slack. It runs on the [Reddit Scraper](https://apify.com/harshmaur/reddit-scraper) Actor on Apify, so it needs no Reddit API access.\n\n### How it works\n1. **Every morning** runs at 07:00.\n2. **Search Reddit for buying intent** searches each phrase for posts from the last day.\n3. **Optional AI filter**: when `useAiFilter` is true, the Actor labels each post with `wants_software` and **Keep real leads** drops posts labelled false (job ads, hiring, news, self-promotion).\n4. **Skip leads already saved** drops posts from earlier runs.\n5. Each lead is appended to Google Sheets and posted to Slack.\n\n### Setup\n1. Add the **Apify** node (`@apify/n8n-nodes-apify`, a verified community node) if your n8n does not have it yet.\n2. Create an **Apify API** credential (no Apify account yet? [Sign up free](https://console.apify.com/sign-up)) with the token from [Apify Console → Settings → API & Integrations](https://console.apify.com/settings/integrations). The free Apify plan includes monthly credit.\n3. Create a Google Sheet with a `Leads` tab and columns `date, subreddit, title, author, url, upvotes, comments, matched, aiLabel, snippet`. Connect Google Sheets and pick it.\n4. Connect Slack and pick a channel.\n5. Edit `phrases` (quotes mean exact match) and `community` in **Settings**.\n\n### Customization tips\n- The AI filter needs a paid Apify plan and adds about $0.60 per 1,000 posts. On the free plan leave `useAiFilter` false; the run ignores AI options anyway.\n- Rewrite the `wants_software` question in **Search Reddit for buying intent** to fit your product.\n- Results cost $2 per 1,000 on Apify (less on paid Apify plans). The Apify node caps each run at $2.",
         "height": 900,
         "width": 560,
         "color": 1
@@ -93,7 +93,7 @@
             {
               "id": "48e45c70-2660-5039-99ad-221902d25987",
               "name": "phrases",
-              "value": "looking for a tool, alternative to, any software that, recommend an app for",
+              "value": "\"looking for a tool\", \"alternative to\", \"any software that\", \"recommend an app for\"",
               "type": "string"
             },
             {
@@ -374,7 +374,7 @@
           "value": ""
         },
         "messageType": "text",
-        "text": "=:dart: New Reddit lead ({{ $json.searchTerm }}) in {{ $json.communityName }}\n*<{{ $json.postUrl }}|{{ $json.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }}>*\n>{{ ($json.body || '').slice(0, 280).replace(/\\n+/g, ' ') }}",
+        "text": "=:dart: New Reddit lead ({{ $json.searchTerm }}) in {{ $json.communityName }}\n*<{{ $json.postUrl }}|{{ $json.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }}>*{{ $json.body ? '\\n>' + $json.body.slice(0, 280).replace(/\\s+/g, ' ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '' }}",
         "otherOptions": {
           "includeLinkToWorkflow": false,
           "unfurling": false
